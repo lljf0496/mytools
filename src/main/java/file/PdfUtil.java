@@ -11,6 +11,10 @@ import com.jacob.com.Variant;
 
 public class PdfUtil {
 	
+	private static final int wdFormatPDF = 17;
+    private static final int xlTypePDF = 0;
+    private static final int ppSaveAsPDF = 32;
+	
 	
 	@Test
 	public  void excuteTest() {
@@ -29,6 +33,7 @@ public class PdfUtil {
 		System.out.println("转换成功，用时：" + (end - start) + "ms");
 	}
 	
+	
 	/**
 	 * 
 	 * 网页转 word 
@@ -41,7 +46,7 @@ public class PdfUtil {
 	    ComThread.InitSTA();
 	    ActiveXComponent wps = null;
 	    try {
-	      wps = new ActiveXComponent(ActionXNameEnum.WPS.getActionName());//wps 服务
+	      wps = new ActiveXComponent(ActionXNameEnum.WPS_WORD.getActionName());//wps 服务
 	      wps.setProperty("Visible", false);
 	      ActiveXComponent doc = wps.invokeGetComponent("Documents").invokeGetComponent("Open", new Variant(htmlPath));
 	      doc.invoke(doc, "SaveAs", Dispatch.Method, new Object[] { wordPath, 0 }, new int[1]);
@@ -59,6 +64,31 @@ public class PdfUtil {
 	  }
 	
 	/**
+	 * 校验转pdf 格式校验
+	 * @authour ljf
+	 * @time 2018年9月17日
+	 */
+	private static boolean checkToPdfFormat(String sourcePath,String targetPath,String ext) {
+		File sourceFile = new File(sourcePath);
+		if (!(sourcePath.endsWith(ext) && targetPath.endsWith(".pdf"))) {
+			String errmsg = "文件格式错误！";
+			System.out.println(errmsg);
+			return false;
+		} else if (!sourceFile.exists()) {
+			String msg = "解析文件不存在";
+			System.out.println(msg);
+			return false;
+		}else {
+			File target = new File(targetPath);  
+			if (target.exists()) {
+				target.delete();
+			} else {
+				target.getParentFile().mkdirs();// 创建父级目录
+			}
+			return true;
+		}
+	}
+	/**
 	 * word 转 pdf
 	 * @param wordFile word文件
 	 * @param targetPath 生成目标地址
@@ -66,37 +96,23 @@ public class PdfUtil {
 	 * @time 2018年9月17日
 	 */
 	public static void wordToPdf(String wordFile,String targetPath) {
-		File sourceFile = new File(wordFile);
-		if (!(wordFile.endsWith(".doc") && targetPath.endsWith(".pdf"))) {
-			String errmsg = "文件格式错误！";
-			System.out.println(errmsg);
-			return;
-		} else if (!sourceFile.exists()) {
-			String msg = "解析文件不存在";
-			System.out.println(msg);
-			return;
-		}
+		 if(!checkToPdfFormat(wordFile,targetPath,"doc")) { return ;}
 		 ActiveXComponent app = null;
 	       try {
-	    	   //创建一个线程
-	    	 //ComThread.InitSTA();  
+	    	//创建一个线程
+	    	ComThread.InitSTA(true);
 	        // 打开word 应用
-	        app = new ActiveXComponent(ActionXNameEnum.WPS.getActionName());//wps 服务 如果安装office 使用Word.Application
+	        app = new ActiveXComponent(ActionXNameEnum.WPS_WORD.getActionName());//wps 服务 如果安装office 使用Word.Application
 	        // 设置word不可见
 	        app.setProperty("Visible", false);
 	        // 获得word中所有打开的文档
 	        Dispatch documents = app.getProperty("Documents").toDispatch();
 	        Dispatch document = Dispatch.call(documents, "Open", wordFile, false, true).toDispatch();
 	        // 如果文件存在的话，不会覆盖，会直接报错，所以我们需要判断文件是否存在
-	        File target = new File(targetPath);  
-			if (target.exists()) {
-				target.delete();
-			} else {
-				target.getParentFile().mkdirs();// 创建父级目录
-			}
+	        
 	        // 另存为，将文档报错为pdf，其中word保存为pdf的格式宏的值是17
 			//Dispatch.call(doc, "SaveAs", pdfFile, wdFormatPDF);
-	        Dispatch.call(document, "ExportAsFixedFormat", targetPath, 17);//文件另存为 pdf 格式
+	        Dispatch.call(document, "ExportAsFixedFormat", targetPath, wdFormatPDF);
 	        // 关闭文档
 	        Dispatch.call(document, "Close", false); 
 	       }catch(Exception e) {
@@ -107,5 +123,74 @@ public class PdfUtil {
 	       }
 		
 	}
+	
+	/**
+	 * ppt 转 pdf
+	 * @authour ljf
+	 * @time 2018年9月17日
+	 * @param inputFile
+	 * @param pdfFile
+	 */
+	private static void pptToPdf(String pptFile, String targetPath) {
+		 if(!checkToPdfFormat(pptFile,targetPath,"ppt")) { return ;}
+		ActiveXComponent app =null;
+		try {
+            ComThread.InitSTA(true);
+            app = new ActiveXComponent(ActionXNameEnum.WPS_PPT.getActionName());
+            Dispatch ppts = app.getProperty("Presentations").toDispatch();
+            Dispatch ppt = Dispatch.call(ppts, "Open", pptFile, true, false).toDispatch();
+            Dispatch.invoke(ppt, "SaveAs", Dispatch.Method, new Object[]{
+            		targetPath,new Variant(ppSaveAsPDF)},new int[1]);
+            Dispatch.call(ppt, "Close");
+            app.invoke("Quit");
+        } catch (Exception e) {
+        	 app.invoke("Quit", 0);
+        }
+    }
+	
+	/***
+     * 
+     * Excel转化成PDF
+     * 
+     * @param inputFile
+     * @param pdfFile
+     * @return
+     */
+    private static void excelToPdf(String excelPath, String targetPath) {
+    	ActiveXComponent app =null;
+    	if(!checkToPdfFormat(excelPath,targetPath,"xls")) { return ;}
+    	try {
+            ComThread.InitSTA(true);
+            app = new ActiveXComponent(ActionXNameEnum.WPS_EXCEL.getActionName());
+            app.setProperty("Visible", false);
+            app.setProperty("AutomationSecurity", new Variant(3)); // 禁用宏
+            Dispatch excels = app.getProperty("Workbooks").toDispatch();
+            Dispatch excel = Dispatch
+                    .invoke(excels, "Open", Dispatch.Method,
+                            new Object[] { excelPath, new Variant(false), new Variant(false) }, new int[9])
+                    .toDispatch();
+            // 转换格式
+            Dispatch.invoke(excel, "ExportAsFixedFormat", Dispatch.Method, new Object[] { new Variant(0), // PDF格式=0
+            		targetPath, new Variant(xlTypePDF) // 0=标准 (生成的PDF图片不会变模糊) 1=最小文件
+                                            // (生成的PDF图片糊的一塌糊涂)
+            }, new int[1]);
+
+            // 这里放弃使用SaveAs
+            /*
+             * Dispatch.invoke(excel,"SaveAs",Dispatch.Method,new Object[]{
+             * outFile, new Variant(57), new Variant(false), new Variant(57),
+             * new Variant(57), new Variant(false), new Variant(true), new
+             * Variant(57), new Variant(true), new Variant(true), new
+             * Variant(true) },new int[1]);
+             */
+            Dispatch.call(excel, "Close", new Variant(false));
+            ComThread.Release();
+        } catch (Exception e) {
+        	e.printStackTrace();
+        }finally{
+        	app.invoke("Quit", 0);
+        }
+    }
+	
 
 }
