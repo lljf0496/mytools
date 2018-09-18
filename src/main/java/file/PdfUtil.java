@@ -2,6 +2,7 @@ package file;
 
 import java.io.File;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
 import com.jacob.activeX.ActiveXComponent;
@@ -21,13 +22,13 @@ public class PdfUtil {
 		String wordFile = "E:/test_doc/demo1.doc";
 		File file = new File(wordFile);
 		String pdfFile = "E:/test_doc/demo1.pdf";
-		String pdfFile1 = "E:/test_doc/demo2.doc";
+		String htmlFile1 = "E:/test_doc/demo2.html";
 		String html="https://zhidao.baidu.com/question/493254354.html";
 		System.out.println("开始转换...");
 		// 开始时间
 		long start = System.currentTimeMillis();
 		//wordToPdf(wordFile, pdfFile);
-		htmlToWordWPS(html,pdfFile1);
+		wordToHtml(wordFile,htmlFile1);
 		// 结束时间
 		long end = System.currentTimeMillis();
 		System.out.println("转换成功，用时：" + (end - start) + "ms");
@@ -63,14 +64,19 @@ public class PdfUtil {
 	    }
 	  }
 	
+	
+	private static boolean checkToPdfFormat(String sourcePath,String targetPath,String ext) {
+		return checkToPdfFormat(sourcePath,targetPath,ext,"pdf");
+	}
 	/**
 	 * 校验转pdf 格式校验
 	 * @authour ljf
 	 * @time 2018年9月17日
 	 */
-	private static boolean checkToPdfFormat(String sourcePath,String targetPath,String ext) {
+	private static boolean checkToPdfFormat(String sourcePath,String targetPath,String ext,String targetExt) {
 		File sourceFile = new File(sourcePath);
-		if (!(sourcePath.endsWith(ext) && targetPath.endsWith(".pdf"))) {
+		if(StringUtils.isEmpty(targetExt)) {targetExt="pdf";}
+		if (!(sourcePath.endsWith(ext) && targetPath.endsWith(targetExt))) {
 			String errmsg = "文件格式错误！";
 			System.out.println(errmsg);
 			return false;
@@ -121,6 +127,41 @@ public class PdfUtil {
 	       }finally {// 关闭office
 	    	   app.invoke("Quit", 0);
 	       }
+	}
+	
+	/**
+	 * word html 转换
+	 * @authour ljf
+	 * @time 2018年9月18日
+	 * @param wordFile word 文件
+	 * @param targetPath html 文件
+	 */
+	public static void wordToHtml(String wordFile,String targetPath) {
+		if(!checkToPdfFormat(wordFile,targetPath,"doc","html")) { return ;}
+		ActiveXComponent app = null;
+		try {
+			//创建一个线程
+			ComThread.InitSTA(true);
+			// 打开word 应用
+			app = new ActiveXComponent(ActionXNameEnum.WPS_WORD.getActionName());//wps 服务 如果安装office 使用Word.Application
+			// 设置word不可见
+			app.setProperty("Visible", false);
+			// 获得word中所有打开的文档
+			Dispatch documents = app.getProperty("Documents").toDispatch();
+			Dispatch document = Dispatch.call(documents, "Open", wordFile, false, true).toDispatch();
+			// 如果文件存在的话，不会覆盖，会直接报错，所以我们需要判断文件是否存在
+			
+			// 另存为，将文档报错为pdf，其中word保存为 pdf的格式宏的值是17
+			Dispatch.call(document, "SaveAs", targetPath);
+			//Dispatch.call(document, "ExportAsFixedFormat", targetPath, wdFormatPDF);
+			// 关闭文档
+			Dispatch.call(document, "Close", false); 
+		}catch(Exception e) {
+			System.out.println("转换失败===》");
+			e.printStackTrace();
+		}finally {// 关闭office
+			app.invoke("Quit", 0);
+		}
 		
 	}
 	
