@@ -1,4 +1,4 @@
-package anntoations;
+package bean.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 /**
  * 必须校验 注解
  * @author ljf
- * @time 2018�?7�?21�?
+ * @time 2018�?7�?21�?
  */
 @Documented
 @Inherited

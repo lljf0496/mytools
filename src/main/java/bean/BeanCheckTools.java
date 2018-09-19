@@ -19,22 +19,22 @@ import org.springframework.util.ObjectUtils;
 
 import com.alibaba.fastjson.JSONObject;
 
-import anntoations.VerificationMobile;
-import anntoations.VerificationMust;
-import anntoations.verificationNum;
+import bean.annotation.VerificationMobile;
+import bean.annotation.VerificationMust;
+import bean.annotation.verificationNum;
 import net.logstash.logback.encoder.org.apache.commons.lang.math.NumberUtils;
 
 public class BeanCheckTools {
 	
 	private final static Logger log=LoggerFactory.getLogger(BeanCheckTools.class);
-	/**µç»°ºÅÂë**/
+	/**ï¿½ç»°ï¿½ï¿½ï¿½ï¿½**/
 	public static final String REGEX_MOBILE = "^((17[0-9])|(14[0-9])|(13[0-9])|(15[0-9])|(18[0-9]))$";
-	/**ÕýÔò±í´ïÊ½£ºÑéÖ¤Éí·ÝÖ¤*/
+	/**ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê½ï¿½ï¿½ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½Ö¤*/
     public static final String REGEX_ID_CARD = "(^\\d{18}$)|(^\\d{15}$)";
     
 	
 	/**
-	 * ¼ì²é±ØÐëÏî
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	 * @param entity
 	 */
 	public static VerficatResult checkMustEntity(Object entity){
@@ -43,11 +43,11 @@ public class BeanCheckTools {
 		try {
 			Field[] fields = entity.getClass().getDeclaredFields(); 
 			for(Field field:fields){
-				if(field.isAnnotationPresent(VerificationMust.class)){//ÑéÖ¤±ØÐëÏî
+				if(field.isAnnotationPresent(VerificationMust.class)){//ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 					String varName = field.getName();
 					Object obj= getObjectValue(field,entity);
 					if(ObjectUtils.isEmpty(obj)){
-						msg=varName+" ±ØÐë²»Îª¿Õ";
+						msg=varName+" ï¿½ï¿½ï¿½ë²»Îªï¿½ï¿½";
 						flag=false;
 						break;
 					}
@@ -56,7 +56,7 @@ public class BeanCheckTools {
 					String varName = field.getName();
 					Object obj= getObjectValue(field,entity);
 					if(ObjectUtils.isEmpty(obj) || !NumberUtils.isNumber(String.valueOf(obj))){
-						 msg=varName+" ±ØÐëÊý×Ö";
+						 msg=varName+" ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½";
 						 flag=false;
 						 break;
 					}
@@ -65,14 +65,14 @@ public class BeanCheckTools {
 					String varName = field.getName();
 					Object obj= getObjectValue(field,entity);
 					if(ObjectUtils.isEmpty(obj) || !verificationMobile(String.valueOf(obj))){
-						msg=varName+" ±ØÐë11Î»µç»°ºÅÂë";
+						msg=varName+" ï¿½ï¿½ï¿½ï¿½11Î»ï¿½ç»°ï¿½ï¿½ï¿½ï¿½";
 						flag=false;
 						break;
 					}
 				}
 			}
 		} catch (Exception e) {
-			msg="´¦Àí³ö´í";
+			msg="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½";
 			flag=false;
 			log.error(msg,e);
 		}
@@ -80,9 +80,9 @@ public class BeanCheckTools {
 	}
 	
 	/**
-	 * µç»°ºÅÂëÐ£Ñé
+	 * ï¿½ç»°ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½
 	 * @authour ljf
-	 * @time 2018Äê7ÔÂ21ÈÕ
+	 * @time 2018ï¿½ï¿½7ï¿½ï¿½21ï¿½ï¿½
 	 * @param value
 	 * @return
 	 */
@@ -92,9 +92,9 @@ public class BeanCheckTools {
 		return Pattern.matches(REGEX_MOBILE, value);
 	}
 	/**
-	 * Éí·ÝÖ¤Ð£Ñé
+	 * ï¿½ï¿½ï¿½Ö¤Ð£ï¿½ï¿½
 	 * @authour ljf
-	 * @time 2018Äê7ÔÂ21ÈÕ
+	 * @time 2018ï¿½ï¿½7ï¿½ï¿½21ï¿½ï¿½
 	 * @param value
 	 * @return
 	 */
@@ -104,9 +104,9 @@ public class BeanCheckTools {
 		return !chineseWord(value);
 	}
 	/**
-	 * ÖÐÎÄÐ£ÑéÐ£Ñé
+	 * ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½Ð£ï¿½ï¿½
 	 * @authour ljf
-	 * @time 2018Äê7ÔÂ21ÈÕ
+	 * @time 2018ï¿½ï¿½7ï¿½ï¿½21ï¿½ï¿½
 	 * @param value
 	 * @return
 	 */
@@ -115,9 +115,9 @@ public class BeanCheckTools {
 	}
 	
 	/**
-	 * ´«µÝ²ÎÊý×ª»»Îªjson¸ñÊ½
+	 * ï¿½ï¿½ï¿½Ý²ï¿½ï¿½ï¿½×ªï¿½ï¿½Îªjsonï¿½ï¿½Ê½
 	 * @authour ljf
-	 * @time 2018Äê7ÔÂ21ÈÕ
+	 * @time 2018ï¿½ï¿½7ï¿½ï¿½21ï¿½ï¿½
 	 * @param req
 	 * @return
 	 */
@@ -134,7 +134,7 @@ public class BeanCheckTools {
 	}
 	
 	/**
-	 * È¡¶ÔÏóÊôÐÔÖµ
+	 * È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµ
 	 */
 	public static Object getObjectValue(Field field,Object entity) throws IllegalArgumentException, IllegalAccessException{
 		if(!field.isAccessible()){field.setAccessible(true);}
@@ -143,11 +143,11 @@ public class BeanCheckTools {
 	}
 	
 	/**
-	 * ·Ö¸î×Ö·û´®³ÉÊý×é 
-	 * ²¢¸²¸ÇÔ­À´Êý¾Ý
-	 * @param value map ¶ÔÏó
-	 * @param filed ¸Ä×Ö¶Î
-	 * @param splidChar ·Ö¸î·û
+	 * ï¿½Ö¸ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	 * @param value map ï¿½ï¿½ï¿½ï¿½
+	 * @param filed ï¿½ï¿½ï¿½Ö¶ï¿½
+	 * @param splidChar ï¿½Ö¸ï¿½ï¿½
 	 */
 	public static void splitString(JSONObject value,String filed,String splidChar){
 		Object denger=value.get(filed);
@@ -159,7 +159,7 @@ public class BeanCheckTools {
 	
 	
 	/**
-	 * ÁÐ±íµ¹Ðò
+	 * ï¿½Ð±ï¿½ï¿½ï¿½
 	 */
 	public static Object  reverse(List list){
 		if(list!=null && !list.isEmpty()){
