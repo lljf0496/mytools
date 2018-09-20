@@ -1,6 +1,7 @@
 package file;
 
 import java.io.File;
+import java.io.FileOutputStream;
 
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
@@ -9,13 +10,42 @@ import com.jacob.activeX.ActiveXComponent;
 import com.jacob.com.ComThread;
 import com.jacob.com.Dispatch;
 import com.jacob.com.Variant;
+import com.lowagie.text.pdf.PdfReader;
+import com.lowagie.text.pdf.PdfStamper;
+import com.lowagie.text.pdf.PdfWriter;
 
 public class PdfUtil {
 	
 	private static final int wdFormatPDF = 17;
     private static final int xlTypePDF = 0;
     private static final int ppSaveAsPDF = 32;
+    private static final String defaultKey="keys";//默认秘钥 
 	
+    
+    /**
+	 * pdf 限制复制 更改内容, 只有打印功能
+	 * @authour ljf
+	 * @time 2018年6月13日
+	 * @param orginFile 原文件
+	 * @param projId 项目id
+	 * @param parentId 原文件id 
+	 * @return
+	 * @throws Exception
+	 */
+	public void encryptPdfFile(File orginFile,String projId,String parentId,String targetPath) throws Exception{
+		PdfReader reader = new PdfReader(orginFile.getPath());// 待加水印的文件
+		File newfile=new File(targetPath);
+		if(newfile.exists()) newfile.delete();
+		newfile.createNewFile();
+		PdfStamper stamper = new PdfStamper(reader, new FileOutputStream(newfile));// 加完水印的文件
+		stamper.setEncryption(null, defaultKey.getBytes(), PdfWriter.AllowCopy, false);//限制复制 更改信息
+		stamper.setEncryption(null, defaultKey.getBytes(), PdfWriter.AllowModifyAnnotations, false);//限制复制 更改信息
+		stamper.setEncryption(null, defaultKey.getBytes(), PdfWriter.AllowModifyContents, false);//限制复制 更改信息
+		stamper.setEncryption(null, defaultKey.getBytes(), PdfWriter.AllowPrinting, true);//限制复制 更改信息
+		stamper.close();
+		reader.close();
+		newfile.renameTo(orginFile);//文件重命名
+	}
 	
 	@Test
 	public  void excuteTest() {

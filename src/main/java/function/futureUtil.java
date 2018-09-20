@@ -11,7 +11,7 @@ import java.util.concurrent.Future;
  * @author ljf
  * @time 2018年9月15日
  */
-public class FuilterUtil {
+public class futureUtil {
 
 	private ExecutorService executor = Executors.newFixedThreadPool(8);
 	
