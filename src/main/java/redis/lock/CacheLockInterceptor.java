@@ -48,9 +48,10 @@ public class CacheLockInterceptor implements InvocationHandler {
         }
         try{
             //加锁成功，执行方法
-            return method.invoke(proxied, args);
+            return method.invoke(proxyObj, args);
         }finally{
             lock.unlock();//释放锁
+        }
 	}
         
         /**
